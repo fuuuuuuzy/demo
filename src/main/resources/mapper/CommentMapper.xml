@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springboot.demo.dao.CommentMpper">
+    <resultMap id="commentWithRelateAndComment" type="Comment">
+        <id column="c_id" property="id"/>
+        <result column="c_create_time" property="cCreateTime"/>
+        <result column="c_content" property="cContent"/>
+        <result column="c_from_tuser_id" property="cFromTuserId"/>
+        <result column="c_to_blog_id" property="cToBlogId"/>
+        <result column="c_to_comment_id" property="cToCommentId"/>
+        <association property="user" javaType="TUser">
+            <id column="t_id" property="id"/>
+            <result column="tuser_name" property="tuserName"/>
+            <result column="tuser_password" property="tuserPassword"/>
+            <result column="summary" property="summary"/>
+        </association>
+        <collection property="relates" ofType="Relate">
+            <id column="r_id" property="id"/>
+            <result column="r_create_time" property="rCreateTime"/>
+            <result column="r_type" property="rType"/>
+            <result column="r_from_tuser_id" property="rFromTuserId"/>
+            <result column="r_to_type" property="rToType"/>
+            <result column="r_to_id" property="rToId"/>
+            <result column="status" property="status"/>
+        </collection>
+    </resultMap>
+    <select id="selectById" resultMap="commentWithRelateAndComment">
+        select * from comment c,tuser t,relate r
+        where c_to_blog_id=#{blogId} and c_to_comment_id=#{commentId}
+    </select>
+    <insert id="insertComment">
+        insert into comment(c_content,c_from_tuser_id,c_to_blog_id,c_to_comment_id)
+        values (#{cContent},#{cFromTuserId},#{cToBlogId},#{cToCommentId});
+    </insert>
+    <delete id="deleteComment">
+        delete from comment where c_id=#{id};
+    </delete>
+</mapper>

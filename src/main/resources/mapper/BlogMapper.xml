@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springboot.demo.dao.BlogMapper">
+    <resultMap id="BlogWithRelateAndPic" type="Blog">
+        <id column="b_id" property="id"/>
+        <result column="b_create_time" property="bCreateTime"/>
+        <result column="b_content" property="bContent"/>
+        <result column="b_from_tuser_id" property="bFromTuserId"/>
+        <result column="hint_count" property="hintCount"/>
+        <result column="permission" property="permission"/>
+        <result column="pic_url" property="picUrl"/>
+        <association property="user" javaType="TUser">
+            <id column="t_id" property="id"/>
+            <result column="tuser_name" property="tuserName"/>
+            <result column="tuser_password" property="tuserPassword"/>
+            <result column="summary" property="summary"/>
+        </association>
+        <collection property="relates" ofType="Relate">
+            <id column="r_id" property="id"/>
+            <result column="r_create_time" property="rCreateTime"/>
+            <result column="r_type" property="rType"/>
+            <result column="r_from_tuser_id" property="rFromTuserId"/>
+            <result column="r_to_type" property="rToType"/>
+            <result column="r_to_id" property="rToId"/>
+            <result column="status" property="status"/>
+        </collection>
+        <collection property="comments" ofType="Comment">
+            <id column="c_id" property="id"/>
+            <result column="c_create_time" property="cCreateTime"/>
+            <result column="c_content" property="cContent"/>
+            <result column="c_from_tuser_id" property="cFromTuserId"/>
+            <result column="c_to_type" property="cToType"/>
+            <result column="c_to_blog_id" property="cToBlogId"/>
+            <result column="c_to_comment_id" property="cToCommentId"/>
+        </collection>
+    </resultMap>
+    <sql id="baseBlog">
+        c_to_blog_id=b_id and r_to_type='blog' and r_type in('good','relay')
+    </sql>
+    <sql id="baseBlogWithoutRelate">
+        b_from_tuser_id=t_id and c_to_blog_id=b_id and p_from_blog_id=b_id and r_to_type='blog'
+    </sql>
+
+    <select id="selectBlogByBlogId" resultMap="BlogWithRelateAndPic">
+        select * from blog b,relate r,comment c,tuser t
+        where b.b_id=#{id} and t_id=b_from_tuser_id and <include refid="baseBlog"/>;
+    </select>
+    <select id="selectAllBlogsByTUserId" resultMap="BlogWithRelateAndPic">
+        select * from blog b,relate r,comment c,tuser t
+        where t.t_id = #{id} and b.b_from_tuser_id = t.t_id and <include refid="baseBlog"/>;
+    </select>
+    <select id="selectBlogByIdAndRelate" resultMap="BlogWithRelateAndPic">
+        select * from blog b,relate r,comment c,tuser t
+        where t.t_id=#{id} and r.r_type=#{rType} and <include refid="baseBlogWithoutRelate"/> ;
+    </select>
+    <select id="selectBlogByHot" resultMap="BlogWithRelateAndPic">
+        select * from blog b,relate r,comment c,tuser t
+        where <include refid="baseBlog"/>
+        order by b.hint_count desc;
+    </select>
+    <select id="selectBlogByText" resultMap="BlogWithRelateAndPic">
+        select * from blog b,relate r,comment c,tuser t
+        where b_content like concat('%',#{text},'%') and <include refid="baseBlog"/>;
+    </select>
+    <insert id="insertBlog" keyProperty="id" useGeneratedKeys="true">
+        insert into blog
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="1">
+                b_create_time,b_content,b_from_tuser_id,permission
+            </if>
+            <if test="picUrl!=null">
+                ,pic_url
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="1">
+                #{bCreateTime},#{bContent},#{bFromTuserId},#{permission}
+            </if>
+            <if test="picUrl!=null">
+                ,#{picUrl}
+            </if>
+        </trim>
+        ;
+    </insert>
+    <update id="updateBlogHot">
+        update blog set hint_count = (hint_count+1) where b_id=#{id};
+    </update>
+    <delete id="deleteBlog">
+        delete from blog where b_id=#{id};
+    </delete>
+</mapper>
