@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.TUserMapper">
+    <resultMap id="TUserWithRelate" type="TUser">
+        <id column="t_id" property="id"/>
+        <result column="tuser_name" property="tuserName"/>
+        <result column="tuser_password" property="tuserPassword"/>
+        <result column="summary" property="summary"/>
+        <collection property="relates" ofType="Relate">
+            <id column="r_id" property="id"/>
+            <result column="r_create_time" property="rCreateTime"/>
+            <result column="r_type" property="rType"/>
+            <result column="r_from_tuser_id" property="rFromTuserId"/>
+            <result column="r_to_type" property="rToType"/>
+            <result column="r_to_id" property="rToId"/>
+            <result column="status" property="status"/>
+        </collection>
+    </resultMap>
+    <sql id="baseTUser">
+        r_from_tuser_id=t_id and r_to_type='user' and r_type in('follow','block')
+    </sql>
+
+    <select id="selectTUserByName" resultMap="TUserWithRelate">
+        select * from tuser t,relate r
+        where tuser_name = #{tuserName} and <include refid="baseTUser"/> ;
+    </select>
+
+    <select id="selectTUserById" resultMap="TUsreWithRelate">
+        select t.*,r.* from tuser t,relate r
+        where t_id = #{id} and <include refid="baseTUser"/> ;
+    </select>
+
+    <select id="selectTUserByRelate" resultMap="TUsreWithRelate">
+        select * from tuser t,relate r
+        where t_id = #{id} and r_type=#{rType} and r_to_type=#{rToType} and <include refid="baseTUser"/>
+    </select>
+
+    <insert id="insertTUser">
+        insert into tuser(tuser_name,tuser_password) values (#{tuserName},#{tuserPassword});
+    </insert>
+
+    <delete id="deleteTUserById">
+        delete from tuser where t_id = #{id};
+    </delete>
+
+    <update id="updateSummaryById">
+        update tuser set summary = #{summary} where t_id = #{id};
+    </update>
+</mapper>
