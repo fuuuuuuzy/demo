@@ -8,7 +8,7 @@
                 <indexLeft></indexLeft>
             </el-aside>
             <el-main>
-                <contentArea></contentArea>
+                <contentArea :tags="tags"></contentArea>
                 </el-main>
             <el-aside width="250px">
                 <indexRight></indexRight>
@@ -25,7 +25,14 @@ import topBar from '@/components/common/Top.vue'
 import contentArea from '@/components/common/Content.vue'
 
 export default {
-  components: { indexLeft, indexRight, indexEdit, topBar, contentArea }
+    components: { indexLeft, indexRight, indexEdit, topBar, contentArea },
+    data() {
+        return {
+            tags: ['标签一', '标签二', '标签三', '标签四'],
+        }
+    }
+
+
 }
 </script>
 
