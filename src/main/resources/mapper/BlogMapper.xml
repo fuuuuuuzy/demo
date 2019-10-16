@@ -9,6 +9,7 @@
         <result column="hint_count" property="hintCount"/>
         <result column="permission" property="permission"/>
         <result column="pic_url" property="picUrl"/>
+        <result column="tag" property="tag"/>
         <association property="user" javaType="TUser">
             <id column="t_id" property="id"/>
             <result column="tuser_name" property="tuserName"/>
@@ -41,27 +42,50 @@
         b_from_tuser_id=t_id and c_to_blog_id=b_id and p_from_blog_id=b_id and r_to_type='blog'
     </sql>
 
+    <select id="selectBlogByTag" resultMap="BlogWithRelateAndPic">
+        select * from blog b
+        where tag=#{tag};
+    </select>
+
     <select id="selectBlogByBlogId" resultMap="BlogWithRelateAndPic">
         select * from blog b,relate r,comment c,tuser t
         where b.b_id=#{id} and t_id=b_from_tuser_id and <include refid="baseBlog"/>;
     </select>
+
+    <!--    <select id="selectAllBlogsByTUserId" resultMap="BlogWithRelateAndPic">
+            select * from blog b,relate r,comment c,tuser t
+            where t.t_id = #{id} and b.b_from_tuser_id = t.t_id and <include refid="baseBlog"/>;
+        </select>-->
     <select id="selectAllBlogsByTUserId" resultMap="BlogWithRelateAndPic">
         select * from blog b,relate r,comment c,tuser t
-        where t.t_id = #{id} and b.b_from_tuser_id = t.t_id and <include refid="baseBlog"/>;
+        where t.t_id = #{id} and b.b_from_tuser_id = t.t_id ;
     </select>
+
     <select id="selectBlogByIdAndRelate" resultMap="BlogWithRelateAndPic">
         select * from blog b,relate r,comment c,tuser t
         where t.t_id=#{id} and r.r_type=#{rType} and <include refid="baseBlogWithoutRelate"/> ;
     </select>
+
+    <!--    <select id="selectBlogByHot" resultMap="BlogWithRelateAndPic">
+            select * from blog b,relate r,comment c,tuser t
+            where <include refid="baseBlog"/>
+            order by b.hint_count desc;
+        </select>-->
     <select id="selectBlogByHot" resultMap="BlogWithRelateAndPic">
-        select * from blog b,relate r,comment c,tuser t
-        where <include refid="baseBlog"/>
+        select * from blog b
         order by b.hint_count desc;
     </select>
+
+    <!--    <select id="selectBlogByText" resultMap="BlogWithRelateAndPic">
+            select * from blog b,relate r,comment c,tuser t
+            where b_content like concat('%',#{text},'%') and <include refid="baseBlog"/>;
+        </select>-->
     <select id="selectBlogByText" resultMap="BlogWithRelateAndPic">
-        select * from blog b,relate r,comment c,tuser t
-        where b_content like concat('%',#{text},'%') and <include refid="baseBlog"/>;
+        select * from blog b
+        where b_content like concat('%',#{text},'%');
     </select>
+
+
     <insert id="insertBlog" keyProperty="id" useGeneratedKeys="true">
         insert into blog
         <trim prefix="(" suffix=")" suffixOverrides=",">

@@ -17,6 +17,7 @@ public class Blog {
     //允许查看对象：所有人是0，用户关注对象是1，用户粉丝是2,
     private int permission;
     private String picUrl;
+    private int tag;
     private TUser user;
     private List<Relate> relates;
     private List<Comment> comments;

@@ -20,6 +20,16 @@ public class BlogController {
     @Autowired
     BlogService service;
 
+    @RequestMapping("/selectByTag/{tag}/{page}")
+    @ResponseBody
+    public List<Blog> getBlogsByTag(@PathVariable("tag")int tag,@PathVariable("page")int page){
+        List<Blog> blogs = service.selectBlogByTag(tag,page);
+        for (Blog blog:blogs){
+            System.out.println("id:"+blog.getId());
+        }
+        return blogs;
+    }
+
     /**
      * 获取某类博客：①自己或其他用户的博客②关注的、粉丝的、点赞过的、评论过的、转发过的博客(√)
      * @param id
@@ -27,20 +37,20 @@ public class BlogController {
      * @param retaleToType
      * @return
      */
-    @RequestMapping(value = {"/getBlog/{id}","/getBlog/{id}/{relateType}/{retaleToType}"})
+    @RequestMapping(value = {"/getBlog/{id}/{page}","/getBlog/{id}/{relateType}/{retaleToType}/{page}"})
     @ResponseBody
-    public BlogJson getBlogs(@PathVariable("id")int id,
+    public BlogJson getBlogs(@PathVariable("id")int id,@PathVariable("page")int page,
                              @PathVariable(required = false,value = "relateType")String relateType,
                              @PathVariable(required = false,value = "retaleToType")String retaleToType,
                              Model model){
         BlogJson json = new BlogJson();
         if (relateType==null){
-            List<Blog> blogs = service.selectAllBlogsByTUserId(id);
+            List<Blog> blogs = service.selectAllBlogsByTUserId(id,page);
             json.setFlag(true);
             json.setBlogs(blogs);
             model.addAttribute("blogs",blogs);
         }else if (relateType!=null){
-            List<Blog> blogs = service.selectBlogByIdAndRelate(id,relateType,retaleToType);
+            List<Blog> blogs = service.selectBlogByIdAndRelate(id,relateType,retaleToType,page);
             json.setFlag(true);
             json.setBlogs(blogs);
             model.addAttribute("blogs",blogs);
@@ -56,10 +66,10 @@ public class BlogController {
      * @param text
      * @return
      */
-    @RequestMapping("/select/{text}")
+    @RequestMapping("/select/{text}/{page}")
     @ResponseBody
-    public List<Blog> selectBlogByText(@PathVariable String text){
-        List<Blog> blogs = service.selectBlogByText(text);
+    public List<Blog> selectBlogByText(@PathVariable String text,@PathVariable("page")int page){
+        List<Blog> blogs = service.selectBlogByText(text,page);
         return blogs;
     }
 
@@ -113,7 +123,7 @@ public class BlogController {
      */
     @RequestMapping("/deleteBlog/{blogId}/{userId}")
     @ResponseBody
-    public String deleteBlog(@PathVariable("blogId")int blogId, @PathVariable("userId")int userId){
+    public String deleteBlog(@PathVariable("blogId")int blogId,@PathVariable("userId")int userId){
         int blogFromId = service.selectBlogByBlogId(blogId).getBFromTuserId();
         if (userId==blogFromId){
             service.deleteBlog(blogId);
@@ -129,9 +139,8 @@ public class BlogController {
      */
     @RequestMapping("/hotBlogs")
     @ResponseBody
-    public List<Blog> getHotBlogs(){
-        return service.selectBlogByHot();
+    public List<Blog> getHotBlogs(@PathVariable("page")int page){
+        return service.selectBlogByHot(page);
     }
-
 
 }

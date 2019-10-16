@@ -10,6 +10,7 @@ import java.util.List;
 public interface BlogMapper {
     //查找单条博客
     Blog selectBlogByBlogId(@Param("id") int id);
+    List<Blog> selectBlogByTag(@Param("tag")int tag);
     //查找某个用户的所有博客
     List<Blog> selectAllBlogsByTUserId(@Param("id") int id);
     //查找某人的（关注的，粉丝的，点赞的，转发的）的博客
